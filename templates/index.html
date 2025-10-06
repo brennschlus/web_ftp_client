@@ -12,10 +12,8 @@
 
 <section class="panel">
     <div class="panel-header">Удалённый сервер</div>
-    <ul class="file-list">
-        <li>..</li>
-        <li>remote_folder/</li>
-        <li>document.pdf</li>
+    <ul id="remote-list" class="file-list" hx-get="/list" hx-trigger="load">
+        <li>Нет данных</li>
     </ul>
 </section>
 

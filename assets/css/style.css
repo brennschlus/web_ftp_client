@@ -28,8 +28,25 @@ body {
 
 .header input {
     width: auto;
-    min-width: 10rem;
     background-color: var(--mantle);
+    color: var(--text);
+    line-height: normal;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    height: 2.5rem;
+    box-sizing: border-box;
+}
+
+.header input::placeholder {
+    color: var(--subtext);
+}
+
+.header button {
+    padding: 0 1.5rem; /* без вертикального */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 2.5rem;
 }
 
 main {
