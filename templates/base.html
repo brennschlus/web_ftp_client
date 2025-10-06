@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="utf-8" />
+        <title>FTP Client</title>
+        <meta name="color-scheme" content="light dark" />
+        <link
+            id="css-light"
+            rel="stylesheet"
+            href="/assets/css/theme-latte.css"
+            media="(prefers-color-scheme: light)"
+        />
+        <link
+            id="css-dark"
+            rel="stylesheet"
+            href="/assets/css/theme-mocha.css"
+            media="(prefers-color-scheme: dark)"
+        />
+        <link rel="stylesheet" href="/assets/css/tiny-brutalism.css" />
+        <link rel="stylesheet" href="/assets/css/style.css" />
+        <script defer src="https://unpkg.com/htmx.org@1.9.5"></script>
+        <script defer>
+            (function () {
+                const meta = document.querySelector(
+                    'meta[name="color-scheme"]',
+                );
+                const linkLight = document.getElementById("css-light");
+                const linkDark = document.getElementById("css-dark");
+
+                function applyScheme(scheme) {
+                    if (scheme === "light") {
+                        linkLight.media = "all";
+                        linkDark.media = "not all";
+                        if (meta) meta.content = "light";
+                    } else if (scheme === "dark") {
+                        linkLight.media = "not all";
+                        linkDark.media = "all";
+                        if (meta) meta.content = "dark";
+                    } else {
+                        linkLight.media = "(prefers-color-scheme: light)";
+                        linkDark.media = "(prefers-color-scheme: dark)";
+                        if (meta) meta.content = "light dark";
+                    }
+                    localStorage.setItem("scheme", scheme);
+                }
+
+                document.addEventListener("DOMContentLoaded", () => {
+                    applyScheme(localStorage.getItem("scheme") || "auto");
+
+                    const switcher = document.getElementById("scheme-switcher");
+                    if (!switcher) return;
+                    switcher.addEventListener("click", (e) => {
+                        const btn = e.target.closest("button[data-scheme]");
+                        if (!btn) return;
+                        const scheme = btn.dataset.scheme;
+                        switcher
+                            .querySelectorAll("button[data-scheme]")
+                            .forEach((b) =>
+                                b.setAttribute(
+                                    "aria-pressed",
+                                    String(b === btn),
+                                ),
+                            );
+                        applyScheme(scheme);
+                    });
+                });
+            })();
+        </script>
+    </head>
+
+    <body>
+        <header class="header">
+            <div>
+                <label for="host">Адрес:</label>
+                <input type="text" id="host" placeholder="ftp.example.com" />
+            </div>
+
+            <div>
+                <label for="port">Порт:</label>
+                <input type="text" id="port" placeholder="21" size="4" />
+            </div>
+
+            <div>
+                <label for="username">Имя пользователя:</label>
+                <input type="text" id="username" placeholder="user" />
+            </div>
+
+            <div>
+                <label for="password">Пароль:</label>
+                <input type="password" id="password" placeholder="password" />
+            </div>
+
+            <div>
+                <button class="button">Подключиться</button>
+            </div>
+        </header>
+
+        <main>{% block content %}{% endblock %}</main>
+
+        <footer>
+            <p>Статус: Соединено</p>
+            <section id="scheme-switcher" aria-label="Color scheme switcher">
+                <button
+                    class="button"
+                    type="button"
+                    aria-pressed="false"
+                    data-scheme="light"
+                >
+                    Light
+                </button>
+                <button
+                    class="button"
+                    type="button"
+                    aria-pressed="true"
+                    data-scheme="auto"
+                >
+                    Auto
+                </button>
+                <button
+                    class="button"
+                    type="button"
+                    aria-pressed="false"
+                    data-scheme="dark"
+                >
+                    Dark
+                </button>
+            </section>
+        </footer>
+    </body>
+</html>

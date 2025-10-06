@@ -1,0 +1,19 @@
+/*
+ * Catppuccin Latte Theme Variables
+ * https://github.com/catppuccin/catppuccin
+ */
+
+:root {
+    color-scheme: light;
+    --base: #eff1f5;
+    --mantle: #e6e9ef;
+    --crust: #dce0e8;
+
+    --text: #4c4f69;
+    --subtext: #6c6f85;
+
+    --accent-blue: #1e66f5;
+    --accent-mauve: #8839ef;
+    --accent-green: #40a02b;
+    --accent-red: #d20f39;
+}
