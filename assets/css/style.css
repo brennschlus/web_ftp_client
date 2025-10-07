@@ -5,6 +5,7 @@
  */
 
 @import url("./tiny-brutalism.css");
+@import url("./iosevka.css");
 
 :root {
     color-scheme: light dark;
@@ -81,7 +82,8 @@ main {
 }
 
 .file-list {
-    font-family: "Roboto Mono", monospace;
+    /*font-family: "Roboto Mono", monospace;*/
+    font-family: "Iosevka Slab", monospace;
     list-style-type: square;
     margin-left: 1.5rem;
 }
