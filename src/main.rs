@@ -2,18 +2,26 @@ use askama::Template;
 use axum::{
     Form, Router,
     extract::State,
-    response::{Html, IntoResponse},
+    response::{Html, IntoResponse, Sse, sse::Event},
     routing::{get, post},
 };
+use futures_util::{Stream, StreamExt};
 use serde::Deserialize;
-use std::sync::Arc;
+use std::{convert::Infallible, sync::Arc, time::Duration};
 use suppaftp::tokio::AsyncFtpStream;
 use tokio::sync::Mutex;
+use tokio_stream::wrappers::IntervalStream;
 use tower_http::{compression::CompressionLayer, services::ServeDir};
 
 #[derive(Template)]
 #[template(path = "index.html")]
 struct IndexTemplate {}
+
+#[derive(Template)]
+#[template(path = "footer.html")]
+struct FooterTemplate {
+    footer: String,
+}
 
 #[derive(Clone)]
 pub struct AppState {
@@ -51,6 +59,44 @@ async fn connect_handler(
     Html(html)
 }
 
+async fn events(
+    State(state): State<AppState>,
+) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
+    println!("Старт отправки событий");
+
+    let interval = tokio::time::interval(Duration::from_secs(2));
+
+    // создаём поток
+    let stream = IntervalStream::new(interval)
+        .then(move |_| {
+            let state = state.clone();
+            async move {
+                let connected = is_connected(&mut *state.connection.lock().await).await;
+
+                let footer_html = if connected {
+                    "<p>✅ Подключено к серверу</p>"
+                } else {
+                    "<p>❌ Нет подключения</p>"
+                };
+
+                let button_html = if connected {
+                    r#"<button class="button" hx-post="/disconnect" hx-swap="none">Отключиться</button>"#
+                } else {
+                    r#"<button class="button" hx-post="/connect" hx-target='#remote-list' hx-swap="innerHTML">Подключиться</button>"#
+                };
+
+                // возвращаем вектор событий
+                vec![
+                    Event::default().event("footer").data(footer_html),
+                    Event::default().event("button").data(button_html),
+                ]
+            }
+        })
+        // разворачиваем вектор в отдельные Event'ы
+        .flat_map(|events| futures_util::stream::iter(events).map(Ok));
+
+    Sse::new(stream)
+}
 async fn list_handler(State(state): State<AppState>) -> Html<String> {
     let mut conn = state.connection.lock().await;
     if let Some(ref mut ftp) = *conn {
@@ -70,6 +116,31 @@ async fn list_handler(State(state): State<AppState>) -> Html<String> {
     }
 }
 
+async fn footer_handler(State(state): State<AppState>) -> impl IntoResponse {
+    let connected = is_connected(&mut *state.connection.lock().await).await;
+    let footer = if connected {
+        "Соединение активно".to_string()
+    } else {
+        "Нет активного соединения".to_string()
+    };
+
+    Html(FooterTemplate { footer }.render().unwrap())
+}
+
+async fn is_connected(state: &mut Option<AsyncFtpStream>) -> bool {
+    if let Some(ftp) = state {
+        match ftp.noop().await {
+            Ok(_) => true,
+            Err(_) => {
+                *state = None;
+                false
+            }
+        }
+    } else {
+        false
+    }
+}
+
 #[tokio::main]
 async fn main() {
     let state = AppState {
@@ -79,12 +150,14 @@ async fn main() {
         .route("/", get(index))
         .route("/connect", post(connect_handler))
         .route("/list", get(list_handler))
+        .route("/footer", get(footer_handler))
+        .route("/events", get(events))
         .nest_service("/assets", ServeDir::new("assets"))
         .layer(CompressionLayer::new())
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
-    println!("🚀 http://0.0.0.0:3000");
+    println!("Сервер запущен на http://0.0.0.0:3000");
     axum::serve(listener, app).await.unwrap();
 }
 

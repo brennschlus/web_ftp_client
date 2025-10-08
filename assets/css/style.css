@@ -220,4 +220,5 @@ footer {
     background-color: var(--crust);
     color: var(--text);
     vertical-align: bottom;
+    width: 100%;
 }

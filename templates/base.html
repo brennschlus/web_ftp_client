@@ -20,14 +20,17 @@
         />
         <link rel="stylesheet" href="/assets/css/tiny-brutalism.css" />
         <link rel="stylesheet" href="/assets/css/style.css" />
-        <script defer src="https://unpkg.com/htmx.org@1.9.5"></script>
+        <script defer src="/assets/js/htmx.js"></script>
+        <script defer src="/assets/js/sse.js"></script>
+
         <script type="module" src="/assets/js/init.js" defer></script>
     </head>
 
-    <body>
+    <body hx-ext="sse" sse-connect="/events">
         <form
+            id="connection-form"
             hx-post="/connect"
-            hx-target="#remote-list"
+            hx-target="#connection-button"
             hx-swap="innerHTML"
             class="header"
         >
@@ -72,41 +75,15 @@
                 />
             </div>
 
-            <div>
+            <div id="connection-button" sse-swap="button">
                 <button class="button" type="submit">Подключиться</button>
             </div>
         </form>
 
         <main>{% block content %}{% endblock %}</main>
 
-        <footer>
-            <p>Статус: Соединено</p>
-            <section id="scheme-switcher" aria-label="Color scheme switcher">
-                <button
-                    class="button"
-                    type="button"
-                    aria-pressed="false"
-                    data-scheme="light"
-                >
-                    Light
-                </button>
-                <button
-                    class="button"
-                    type="button"
-                    aria-pressed="true"
-                    data-scheme="auto"
-                >
-                    Auto
-                </button>
-                <button
-                    class="button"
-                    type="button"
-                    aria-pressed="false"
-                    data-scheme="dark"
-                >
-                    Dark
-                </button>
-            </section>
+        <footer id="footer" sse-swap="footer">
+            <p>Нет подключения</p>
         </footer>
     </body>
 </html>
