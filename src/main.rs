@@ -47,7 +47,6 @@ async fn connect_handler(
         Ok(mut ftp) => {
             if ftp.login(&form.username, &form.password).await.is_ok() {
                 *state.connection.lock().await = Some(ftp);
-                // После успешного подключения просто возвращаем триггер на загрузку списка
                 r#"<div hx-get="/list" hx-trigger="load"></div>"#.to_string()
             } else {
                 "<p>Ошибка авторизации</p>".to_string()
@@ -57,6 +56,20 @@ async fn connect_handler(
     };
 
     Html(html)
+}
+
+async fn disconnect_handler(State(state): State<AppState>) -> Html<String> {
+    let mut conn = state.connection.lock().await;
+
+    if let Some(mut ftp) = conn.take() {
+        if ftp.quit().await.is_ok() {
+            Html("<ul id='remote-list'><li>Нет данных</li></ul>".to_string())
+        } else {
+            Html("<p>Ошибка отключения</p>".to_string())
+        }
+    } else {
+        Html("<p>Ошибка отключения</p>".to_string())
+    }
 }
 
 async fn events(
@@ -80,7 +93,7 @@ async fn events(
                 };
 
                 let button_html = if connected {
-                    r#"<button class="button" hx-post="/disconnect" hx-swap="none">Отключиться</button>"#
+                    r#"<button class="button" hx-post="/disconnect" hx-target='#remote-list' hx-swap="innerHTML">Отключиться</button>"#
                 } else {
                     r#"<button class="button" hx-post="/connect" hx-target='#remote-list' hx-swap="innerHTML">Подключиться</button>"#
                 };
@@ -149,6 +162,7 @@ async fn main() {
     let app = Router::new()
         .route("/", get(index))
         .route("/connect", post(connect_handler))
+        .route("/disconnect", post(disconnect_handler))
         .route("/list", get(list_handler))
         .route("/footer", get(footer_handler))
         .route("/events", get(events))
