@@ -1,64 +1,16 @@
-/* === Iosevka Slab Webfont === */
 @font-face {
     font-family: "Iosevka Slab";
-    src: url("../font/iosevka-web/IosevkaSlab-Thin.woff2") format("woff2");
-    font-weight: 100;
-    font-style: normal;
-    font-display: swap;
-}
-@font-face {
-    font-family: "Iosevka Slab";
-    src: url("../font/iosevka-web/IosevkaSlab-ExtraLight.woff2") format("woff2");
-    font-weight: 200;
-    font-style: normal;
-    font-display: swap;
-}
-@font-face {
-    font-family: "Iosevka Slab";
-    src: url("../font/iosevka-web/IosevkaSlab-Light.woff2") format("woff2");
-    font-weight: 300;
-    font-style: normal;
-    font-display: swap;
-}
-@font-face {
-    font-family: "Iosevka Slab";
-    src: url("../font/iosevka-web/IosevkaSlab-Regular.woff2") format("woff2");
+    src: url("../font/iosevka-web/IosevkaSlab-Regular-subset.woff2")
+        format("woff2");
     font-weight: 400;
-    font-style: normal;
     font-display: swap;
+    unicode-range: U+0020-007F, U+0400-04FF;
 }
 @font-face {
     font-family: "Iosevka Slab";
-    src: url("../font/iosevka-web/IosevkaSlab-Medium.woff2") format("woff2");
-    font-weight: 500;
-    font-style: normal;
-    font-display: swap;
-}
-@font-face {
-    font-family: "Iosevka Slab";
-    src: url("../font/iosevka-web/IosevkaSlab-SemiBold.woff2") format("woff2");
-    font-weight: 600;
-    font-style: normal;
-    font-display: swap;
-}
-@font-face {
-    font-family: "Iosevka Slab";
-    src: url("../font/iosevka-web/IosevkaSlab-Bold.woff2") format("woff2");
+    src: url("../font/iosevka-web/IosevkaSlab-Bold-subset.woff2")
+        format("woff2");
     font-weight: 700;
-    font-style: normal;
     font-display: swap;
-}
-@font-face {
-    font-family: "Iosevka Slab";
-    src: url("../font/iosevka-web/IosevkaSlab-ExtraBold.woff2") format("woff2");
-    font-weight: 800;
-    font-style: normal;
-    font-display: swap;
-}
-@font-face {
-    font-family: "Iosevka Slab";
-    src: url("../font/iosevka-web/IosevkaSlab-Heavy.woff2") format("woff2");
-    font-weight: 900;
-    font-style: normal;
-    font-display: swap;
+    unicode-range: U+0020-007F, U+0400-04FF;
 }

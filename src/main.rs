@@ -9,7 +9,7 @@ use serde::Deserialize;
 use std::sync::Arc;
 use suppaftp::tokio::AsyncFtpStream;
 use tokio::sync::Mutex;
-use tower_http::services::ServeDir;
+use tower_http::{compression::CompressionLayer, services::ServeDir};
 
 #[derive(Template)]
 #[template(path = "index.html")]
@@ -80,6 +80,7 @@ async fn main() {
         .route("/connect", post(connect_handler))
         .route("/list", get(list_handler))
         .nest_service("/assets", ServeDir::new("assets"))
+        .layer(CompressionLayer::new())
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();

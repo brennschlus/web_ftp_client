@@ -18,11 +18,14 @@
 
 html,
 body {
-    height: 100%;
+    /*height: 100%;*/
     /*font-family: "Roboto Mono", monospace;*/
-    font-family: "Iosevka Slab", monospace;
+    font-family: "Iosevka Slab", "Roboto Mono", monospace;
     background-color: #fff;
     color: #000;
+    line-height: 1.4; /* фиксируем */
+    font-size: 14px; /* фиксируем базовую метрику */
+    min-height: 100vh;
 }
 
 /* Typography */
@@ -113,6 +116,8 @@ button,
     transition: all 0.2s ease;
     /*font-family: "Roboto Mono", monospace;*/
     font-family: "Iosevka Slab", monospace;
+    line-height: 1.4; /* фиксируем */
+    font-size: 14px; /* фиксируем базовую метрику */
 }
 
 button:hover,
@@ -131,6 +136,8 @@ select {
     box-shadow: 4px 4px 0 #000;
     /*font-family: "Roboto Mono", monospace;*/
     font-family: "Iosevka Slab", monospace;
+    line-height: 1.4; /* фиксируем */
+    font-size: 14px; /* фиксируем базовую метрику */
 }
 
 textarea {

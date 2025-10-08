@@ -4,6 +4,7 @@
         <meta charset="utf-8" />
         <title>FTP Client</title>
         <meta name="color-scheme" content="light dark" />
+        <meta name="viewport" content="width=device-width" />
         <link rel="stylesheet" href="/assets/css/iosevka.css" />
         <link
             id="css-light"
@@ -20,53 +21,7 @@
         <link rel="stylesheet" href="/assets/css/tiny-brutalism.css" />
         <link rel="stylesheet" href="/assets/css/style.css" />
         <script defer src="https://unpkg.com/htmx.org@1.9.5"></script>
-        <script defer>
-            (function () {
-                const meta = document.querySelector(
-                    'meta[name="color-scheme"]',
-                );
-                const linkLight = document.getElementById("css-light");
-                const linkDark = document.getElementById("css-dark");
-
-                function applyScheme(scheme) {
-                    if (scheme === "light") {
-                        linkLight.media = "all";
-                        linkDark.media = "not all";
-                        if (meta) meta.content = "light";
-                    } else if (scheme === "dark") {
-                        linkLight.media = "not all";
-                        linkDark.media = "all";
-                        if (meta) meta.content = "dark";
-                    } else {
-                        linkLight.media = "(prefers-color-scheme: light)";
-                        linkDark.media = "(prefers-color-scheme: dark)";
-                        if (meta) meta.content = "light dark";
-                    }
-                    localStorage.setItem("scheme", scheme);
-                }
-
-                document.addEventListener("DOMContentLoaded", () => {
-                    applyScheme(localStorage.getItem("scheme") || "auto");
-
-                    const switcher = document.getElementById("scheme-switcher");
-                    if (!switcher) return;
-                    switcher.addEventListener("click", (e) => {
-                        const btn = e.target.closest("button[data-scheme]");
-                        if (!btn) return;
-                        const scheme = btn.dataset.scheme;
-                        switcher
-                            .querySelectorAll("button[data-scheme]")
-                            .forEach((b) =>
-                                b.setAttribute(
-                                    "aria-pressed",
-                                    String(b === btn),
-                                ),
-                            );
-                        applyScheme(scheme);
-                    });
-                });
-            })();
-        </script>
+        <script type="module" src="/assets/js/init.js" defer></script>
     </head>
 
     <body>
