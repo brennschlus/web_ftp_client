@@ -5,27 +5,12 @@
         <title>FTP Client</title>
         <meta name="color-scheme" content="light dark" />
         <meta name="viewport" content="width=device-width" />
-        <link rel="stylesheet" href="/assets/css/iosevka.css" />
-        <link
-            id="css-light"
-            rel="stylesheet"
-            href="/assets/css/theme-latte.css"
-            media="(prefers-color-scheme: light)"
-        />
-        <link
-            id="css-dark"
-            rel="stylesheet"
-            href="/assets/css/theme-mocha.css"
-            media="(prefers-color-scheme: dark)"
-        />
-        <link rel="stylesheet" href="/assets/css/tiny-brutalism.css" />
-        <link rel="stylesheet" href="/assets/css/style.css" />
+        <link rel="stylesheet" href="/assets/css/main.css" />
         <script defer src="/assets/js/htmx.js"></script>
         <script defer src="/assets/js/sse.js"></script>
-
         <script type="module" src="/assets/js/init.js" defer></script>
+        <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
     </head>
-
     <body hx-ext="sse" sse-connect="/events">
         <form
             id="connection-form"
@@ -35,18 +20,17 @@
             class="header"
         >
             <div>
-                <label for="host">Адрес:</label>
-                <input
+                <label for="host">Адрес:</label
+                ><input
                     type="text"
                     name="host"
                     id="host"
                     placeholder="127.0.0.1"
                 />
             </div>
-
             <div>
-                <label for="port">Порт:</label>
-                <input
+                <label for="port">Порт:</label
+                ><input
                     type="text"
                     name="port"
                     id="port"
@@ -54,36 +38,29 @@
                     size="4"
                 />
             </div>
-
             <div>
-                <label for="username">Имя пользователя:</label>
-                <input
+                <label for="username">Имя пользователя:</label
+                ><input
                     type="text"
                     name="username"
                     id="username"
                     placeholder="user"
                 />
             </div>
-
             <div>
-                <label for="password">Пароль:</label>
-                <input
+                <label for="password">Пароль:</label
+                ><input
                     type="password"
                     name="password"
                     id="password"
                     placeholder="password"
                 />
             </div>
-
             <div id="connection-button" sse-swap="button">
                 <button class="button" type="submit">Подключиться</button>
             </div>
         </form>
-
         <main>{% block content %}{% endblock %}</main>
-
-        <footer id="footer" sse-swap="footer">
-            <p>Нет подключения</p>
-        </footer>
+        <footer id="footer" sse-swap="footer"><p>Нет подключения</p></footer>
     </body>
 </html>

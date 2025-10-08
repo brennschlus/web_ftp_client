@@ -1,0 +1,12 @@
+:root {
+  color-scheme: dark;
+  --base: #1e1e2e;
+  --mantle: #181825;
+  --crust: #11111b;
+  --text: #cdd6f4;
+  --subtext: #a6adc8;
+  --accent-blue: #89b4fa;
+  --accent-mauve: #cba6f7;
+  --accent-green: #a6e3a1;
+  --accent-red: #f38ba8;
+}

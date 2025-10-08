@@ -1,6 +1,6 @@
 @font-face {
     font-family: "Iosevka Slab";
-    src: url("../font/iosevka-web/IosevkaSlab-Regular-subset.woff2")
+    src: url("../../font/iosevka-web/IosevkaSlab-Regular-subset.woff2")
         format("woff2");
     font-weight: 400;
     font-display: swap;
@@ -8,7 +8,7 @@
 }
 @font-face {
     font-family: "Iosevka Slab";
-    src: url("../font/iosevka-web/IosevkaSlab-Bold-subset.woff2")
+    src: url("../../font/iosevka-web/IosevkaSlab-Bold-subset.woff2")
         format("woff2");
     font-weight: 700;
     font-display: swap;

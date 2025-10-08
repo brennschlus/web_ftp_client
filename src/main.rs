@@ -79,7 +79,6 @@ async fn events(
 
     let interval = tokio::time::interval(Duration::from_secs(2));
 
-    // создаём поток
     let stream = IntervalStream::new(interval)
         .then(move |_| {
             let state = state.clone();
@@ -87,7 +86,7 @@ async fn events(
                 let connected = is_connected(&mut *state.connection.lock().await).await;
 
                 let footer_html = if connected {
-                    "<p>✅ Подключено к серверу</p>"
+                    "<p>Подключено к серверу</p>"
                 } else {
                     "<p>❌ Нет подключения</p>"
                 };
@@ -105,7 +104,6 @@ async fn events(
                 ]
             }
         })
-        // разворачиваем вектор в отдельные Event'ы
         .flat_map(|events| futures_util::stream::iter(events).map(Ok));
 
     Sse::new(stream)

@@ -1,0 +1,14 @@
+:root { color-scheme: light dark; }
+.header {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 1rem;
+  padding: 1rem; border: 2px solid var(--border); box-shadow: var(--shadow);
+  margin-bottom: 1rem;
+}
+main { display: flex; border: 2px solid var(--border); margin-bottom: 1rem; padding: 5rem; }
+.panel { flex: 1; padding: 1rem; }
+.panel + .panel { border-left: 2px solid var(--border); }
+.panel-header { font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; }
+footer {
+  text-align: center; padding: 1rem; border: 2px solid var(--border);
+  background-color: var(--crust); color: var(--text); width: 100%;
+}
