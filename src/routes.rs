@@ -1,4 +1,4 @@
-use std::{convert::Infallible, time::Duration};
+use std::{convert::Infallible, str::FromStr, time::Duration};
 
 use askama::Template;
 use axum::{
@@ -7,10 +7,35 @@ use axum::{
     response::{Html, IntoResponse, Sse, sse::Event},
 };
 use futures_util::{Stream, StreamExt};
-use suppaftp::tokio::AsyncFtpStream;
+use serde::Serialize;
+use suppaftp::{list::File, tokio::AsyncFtpStream};
 use tokio_stream::wrappers::IntervalStream;
 
-use crate::{AppState, ConnectForm, helpers::is_connected, templates::IndexTemplate};
+use crate::{
+    AppState, ConnectForm,
+    helpers::is_connected,
+    templates::{FilesTableTemplate, IndexTemplate},
+};
+
+#[derive(Serialize)]
+pub struct FileInfo {
+    pub name: String,
+    pub kind: String,
+    pub size: String,
+}
+
+impl From<&File> for FileInfo {
+    fn from(f: &File) -> Self {
+        Self {
+            name: f.name().to_string(),
+            kind: match f.is_directory() {
+                true => "dir".into(),
+                false => "file".into(),
+            },
+            size: crate::filters::format_size(&f.size()).unwrap_or("unknown".into()),
+        }
+    }
+}
 
 pub async fn index() -> impl IntoResponse {
     Html(IndexTemplate {}.render().unwrap())
@@ -21,12 +46,14 @@ pub async fn list_handler(State(state): State<AppState>) -> Html<String> {
     if let Some(ref mut ftp) = *conn {
         match ftp.list(None).await {
             Ok(list) => {
-                let html = list
+                let files = list
                     .into_iter()
-                    .map(|item| format!("<li>{}</li>", item))
-                    .collect::<Vec<_>>()
-                    .join("\n");
-                Html(html)
+                    .map(|item| File::from_str(&item))
+                    .into_iter()
+                    .flatten()
+                    .map(|item| FileInfo::from(&item))
+                    .collect::<Vec<_>>();
+                Html(FilesTableTemplate { files }.render().unwrap())
             }
             Err(err) => Html(format!("<li>Ошибка: {}</li>", err)),
         }

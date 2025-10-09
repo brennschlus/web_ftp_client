@@ -9,6 +9,7 @@ use tokio::sync::Mutex;
 use tower_http::{compression::CompressionLayer, services::ServeDir};
 
 use crate::routes::{connect_handler, disconnect_handler, events, index, list_handler};
+mod filters;
 mod helpers;
 mod routes;
 mod templates;
