@@ -14,29 +14,13 @@ pub async fn is_connected(state: &mut Option<AsyncFtpStream>) -> bool {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct Breadcrumb {
-    pub name: String,
-    pub path: String,
-}
-
-pub fn make_remote_breadcrumbs(current_path: &str) -> Vec<Breadcrumb> {
-    let mut crumbs = Vec::new();
-    let mut path_accum = String::new();
-
-    for part in current_path.trim_matches('/').split('/') {
-        if part.is_empty() {
-            continue;
-        }
-
-        path_accum.push('/');
-        path_accum.push_str(part);
-
-        crumbs.push(Breadcrumb {
-            name: part.to_string(),
-            path: path_accum.clone(),
-        });
-    }
-
-    crumbs
-}
+// pub fn render_file_table(files: Vec<String>) -> Html<String> {
+//     let files = files
+//         .into_iter()
+//         .map(|item| File::from_str(&item))
+//         .into_iter()
+//         .flatten()
+//         .map(|item| FileInfo::from(&item))
+//         .collect::<Vec<_>>();
+//     Html(FilesTableTemplate { files }.render().unwrap())
+// }

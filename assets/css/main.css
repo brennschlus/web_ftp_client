@@ -1,6 +1,6 @@
 /* Main entry point for all styles */
 @import url("../css/vendor/iosevka.css");
-@import url("../css/vendor/tiny-brutalism.css");
+@import url("../css/theme-core.css");
 
 @import url("../css/base/reset.css");
 @import url("../css/base/typography.css");

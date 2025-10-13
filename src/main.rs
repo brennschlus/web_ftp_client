@@ -8,7 +8,9 @@ use suppaftp::tokio::AsyncFtpStream;
 use tokio::sync::Mutex;
 use tower_http::{compression::CompressionLayer, services::ServeDir};
 
-use crate::routes::{connect_handler, disconnect_handler, events, index, list_handler};
+use crate::routes::{
+    change_directory_handler, connect_handler, disconnect_handler, events, index, list_handler,
+};
 mod filters;
 mod helpers;
 mod routes;
@@ -27,6 +29,11 @@ struct ConnectForm {
     password: String,
 }
 
+#[derive(Deserialize)]
+struct ChangeDirectoryForm {
+    directory: String,
+}
+
 #[tokio::main]
 async fn main() {
     let state = AppState {
@@ -37,6 +44,7 @@ async fn main() {
         .route("/connect", post(connect_handler))
         .route("/disconnect", post(disconnect_handler))
         .route("/list", get(list_handler))
+        .route("/change_directory", post(change_directory_handler))
         .route("/events", get(events))
         .nest_service("/assets", ServeDir::new("assets"))
         .layer(CompressionLayer::new())

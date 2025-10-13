@@ -1,14 +1,32 @@
-.button, button {
-  background-color: var(--crust); color: var(--text);
-  border: 2px solid var(--border); box-shadow: var(--shadow);
-  padding: 0 1.5rem; height: 2.5rem; display: flex; align-items: center;
-  justify-content: center; cursor: pointer;
+.button,
+button {
+    background-color: var(--crust);
+    color: var(--text);
+    border: 2px solid var(--border);
+    box-shadow: var(--shadow);
+    padding: 0 1.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
 }
-.button:hover, button:hover { box-shadow: 6px 6px 0 var(--border); }
+.button:hover,
+button:hover {
+    box-shadow: 6px 6px 0 var(--border);
+}
 .header input {
-  background-color: var(--mantle); color: var(--text);
-  line-height: normal; padding: 0.5rem; height: 2.5rem;
-  border: 2px solid var(--border); box-shadow: var(--shadow);
+    background-color: var(--mantle);
+    color: var(--text);
+    line-height: normal;
+    padding: 0.5rem;
+    height: 1.5rem;
+    border: 2px solid var(--border);
+    box-shadow: var(--shadow);
 }
-.header input::placeholder { color: var(--subtext); }
-.small-button { font-size: 0.7rem; }
+.header input::placeholder {
+    color: var(--subtext);
+}
+.small-button {
+    font-size: 0.7rem;
+}

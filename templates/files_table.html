@@ -1,89 +1,3 @@
-{% block style %}
-<style>
-    :root {
-        --news-border: color-mix(in srgb, currentColor 60%, transparent);
-        --news-muted: color-mix(in srgb, currentColor 55%, white 45%);
-    }
-
-    .news-table {
-        width: 100%;
-        border: 1px solid var(--news-border);
-        border-radius: 2px;
-        border-collapse: separate;
-        border-spacing: 0;
-        background: transparent;
-        font-family: ui-monospace, "Iosevka", "IBM Plex Mono", monospace;
-        font-size: 0.9rem;
-        line-height: 1.3;
-    }
-
-    .news-table thead th {
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        padding: 0.4rem 0.6rem;
-        text-align: left;
-        color: var(--news-muted);
-        border-bottom: 1px dotted var(--news-border);
-        border-right: 1px dotted var(--news-border);
-    }
-
-    .news-table thead th:last-child {
-        border-right: none;
-        text-align: right;
-    }
-
-    .news-table tbody td {
-        padding: 0.4rem 0.6rem;
-        vertical-align: baseline;
-        border-right: 1px dotted var(--news-border);
-    }
-
-    .news-table tbody td:last-child {
-        border-right: none;
-        text-align: right;
-        font-variant-numeric: tabular-nums;
-    }
-
-    .news-table tbody tr:hover {
-        background: color-mix(in srgb, currentColor 8%, transparent);
-    }
-
-    /* подчёркнутая первая колонка — газетный акцент */
-    .news-table tbody td:first-child {
-        font-weight: 500;
-    }
-
-    /* Адаптив */
-    @media (max-width: 520px) {
-        .news-table thead {
-            display: none;
-        }
-        .news-table,
-        .news-table tbody,
-        .news-table tr,
-        .news-table td {
-            display: block;
-            width: 100%;
-            border: none;
-        }
-        .news-table tr {
-            padding: 0.4rem 0.6rem;
-        }
-        .news-table td {
-            padding: 0.25rem 0;
-        }
-        .news-table td[data-label]::before {
-            content: attr(data-label) " — ";
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--news-muted);
-        }
-    }
-</style>
-{% endblock %}
-
 <table class="news-table" role="table" aria-label="File list">
     <thead>
         <tr>
@@ -93,10 +7,37 @@
         </tr>
     </thead>
     <tbody>
+        <tr>
+            <td data-label="Name">
+                <a
+                    href="#"
+                    hx-post="/change_directory"
+                    hx-vals='{"directory": ".."}'
+                    hx-target="#remote-list"
+                    hx-swap="innerHTML"
+                    class="dir-link"
+                >
+                    ⬆ ..
+                </a>
+            </td>
+            <td data-label="Kind">dir</td>
+            <td data-label="Size">-</td>
+        </tr>
         {% for f in files %}
         <tr>
             <td data-label="Name">
-                {% if f.kind == "dir" %}📁{% else %}📄{% endif %} {{ f.name }}
+                {% if f.kind == "dir" %}
+                <a
+                    href="#"
+                    hx-post="/change_directory"
+                    hx-vals='{"directory": "{{ f.name }}"}'
+                    hx-target="#remote-list"
+                    hx-swap="innerHTML"
+                    class="dir-link"
+                >
+                    📁 {{ f.name }}
+                </a>
+                {% else %} 📄 {{ f.name }} {% endif %}
             </td>
             <td data-label="Kind">{{ f.kind }}</td>
             <td data-label="Size">

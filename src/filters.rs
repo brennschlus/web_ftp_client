@@ -1,6 +1,5 @@
 use askama::Result;
 
-/// Форматирует размер файла в человеко-читаемый вид (Б, КБ, МБ)
 pub fn format_size(size: &usize) -> Result<String> {
     let s = *size as f64;
     let human = if s < 1024.0 {

@@ -8,11 +8,11 @@ use axum::{
 };
 use futures_util::{Stream, StreamExt};
 use serde::Serialize;
-use suppaftp::{list::File, tokio::AsyncFtpStream};
+use suppaftp::{FtpError, list::File, tokio::AsyncFtpStream};
 use tokio_stream::wrappers::IntervalStream;
 
 use crate::{
-    AppState, ConnectForm,
+    AppState, ChangeDirectoryForm, ConnectForm,
     helpers::is_connected,
     templates::{FilesTableTemplate, IndexTemplate},
 };
@@ -132,5 +132,65 @@ pub async fn disconnect_handler(State(state): State<AppState>) -> Html<String> {
         }
     } else {
         Html("<p>Ошибка отключения</p>".to_string())
+    }
+}
+
+pub async fn change_directory_handler(
+    State(state): State<AppState>,
+    Form(form): Form<ChangeDirectoryForm>,
+) -> Html<String> {
+    // Забираем FTP-соединение из состояния
+    let ftp_opt = {
+        let mut conn = state.connection.lock().await;
+        conn.take()
+    };
+
+    if let Some(mut ftp) = ftp_opt {
+        if &form.directory == ".." {
+            match ftp.cdup().await {
+                Ok(_) => {
+                    {
+                        let mut conn = state.connection.lock().await;
+                        *conn = Some(ftp);
+                    }
+
+                    Html("<div hx-get='/list' hx-trigger='load'></div>".to_string())
+                }
+
+                Err(e) => {
+                    println!("Ошибка смены директории: {}", e);
+                    Html(format!("<p>Ошибка смены директории: {}</p>", e))
+                }
+            }
+        } else {
+            match ftp.cwd(&form.directory).await {
+                Ok(_) => {
+                    {
+                        let mut conn = state.connection.lock().await;
+                        *conn = Some(ftp);
+                    }
+
+                    Html("<div hx-get='/list' hx-trigger='load'></div>".to_string())
+                }
+
+                Err(e) => {
+                    println!("Ошибка смены директории: {}", e);
+                    Html(format!("<p>Ошибка смены директории: {}</p>", e))
+                }
+            }
+        }
+
+        // if ftp.cwd(&form.directory).await.is_ok() {
+        //     {
+        //         let mut conn = state.connection.lock().await;
+        //         *conn = Some(ftp);
+        //     }
+
+        //     Html("<div hx-get='/list' hx-trigger='load'></div>".to_string())
+        // } else {
+        //     Html("<p>Ошибка смены директории</p>".to_string())
+        // }
+    } else {
+        Html("<p>Нет активного соединения</p>".to_string())
     }
 }
