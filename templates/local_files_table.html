@@ -1,0 +1,47 @@
+<table class="news-table" role="table" aria-label="Local files">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Kind</th>
+            <th scope="col">Size</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td data-label="Name">
+                <a
+                    href="#"
+                    hx-post="/local_change_directory"
+                    hx-vals='{"directory": ".."}'
+                    hx-target="#local-list"
+                    hx-swap="innerHTML"
+                    class="dir-link"
+                >
+                    ⬆ ..
+                </a>
+            </td>
+            <td data-label="Kind">dir</td>
+            <td data-label="Size">-</td>
+        </tr>
+        {% for f in files %}
+        <tr>
+            <td data-label="Name">
+                {% if f.kind == "dir" %}
+                <a
+                    href="#"
+                    hx-post="/local_change_directory"
+                    hx-vals='{"directory": "{{ f.name }}"}'
+                    hx-target="#local-list"
+                    hx-swap="innerHTML"
+                    class="dir-link"
+                >
+                    📁 {{ f.name }}
+                </a>
+                {% else %} 📄 {{ f.name }} {% endif %}
+            </td>
+            <td data-label="Kind">{{ f.kind }}</td>
+            <td data-label="Size">{{f.size}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

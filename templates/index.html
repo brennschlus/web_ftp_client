@@ -2,11 +2,13 @@
 
 <section class="panel">
     <div class="panel-header">Локальный сервер</div>
-    <ul class="file-list">
-        <li>..</li>
-        <li>folder1/</li>
-        <li>file.txt</li>
-        <li>image.jpg</li>
+    <ul
+        id="local-list"
+        class="local-list"
+        hx-get="/local_list"
+        hx-trigger="load"
+    >
+        <li>Нет данных</li>
     </ul>
 </section>
 

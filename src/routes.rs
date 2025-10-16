@@ -1,4 +1,4 @@
-use std::{convert::Infallible, str::FromStr, time::Duration};
+use std::{convert::Infallible, fs, str::FromStr, time::Duration};
 
 use askama::Template;
 use axum::{
@@ -8,13 +8,13 @@ use axum::{
 };
 use futures_util::{Stream, StreamExt};
 use serde::Serialize;
-use suppaftp::{FtpError, list::File, tokio::AsyncFtpStream};
+use suppaftp::{list::File, tokio::AsyncFtpStream};
 use tokio_stream::wrappers::IntervalStream;
 
 use crate::{
     AppState, ChangeDirectoryForm, ConnectForm,
     helpers::is_connected,
-    templates::{FilesTableTemplate, IndexTemplate},
+    templates::{FilesTableTemplate, IndexTemplate, LocalFilesTableTemplate},
 };
 
 #[derive(Serialize)]
@@ -60,6 +60,60 @@ pub async fn list_handler(State(state): State<AppState>) -> Html<String> {
     } else {
         Html("<li>Нет активного соединения</li>".into())
     }
+}
+
+pub async fn list_local(State(state): State<AppState>) -> Html<String> {
+    let path = state.local_path.lock().await.clone();
+
+    let mut files = Vec::new();
+
+    match fs::read_dir(&path) {
+        Ok(entries) => {
+            for entry in entries.flatten() {
+                let meta = entry.metadata().ok();
+                let name = entry.file_name().to_string_lossy().to_string();
+                let kind = if meta.as_ref().map(|m| m.is_dir()).unwrap_or(false) {
+                    "dir"
+                } else {
+                    "file"
+                }
+                .to_string();
+                let size: Option<u64> =
+                    meta.and_then(|m| if m.is_file() { Some(m.len()) } else { None });
+                files.push(FileInfo {
+                    name,
+                    kind,
+                    size: crate::filters::format_size(&size.map(|s| s as usize).unwrap_or(0))
+                        .unwrap_or("unknown".into()),
+                });
+            }
+            return Html(LocalFilesTableTemplate { files }.render().unwrap());
+        }
+        Err(err) => {
+            return Html(format!("<li>Ошибка: {}</li>", err));
+        }
+    }
+}
+
+pub async fn change_local_directory(
+    State(state): State<AppState>,
+    Form(form): Form<ChangeDirectoryForm>,
+) -> Html<String> {
+    let mut path = state.local_path.lock().await;
+
+    let new_path = if form.directory == ".." {
+        path.parent()
+            .map(|p| p.to_path_buf())
+            .unwrap_or(path.clone())
+    } else {
+        path.join(&form.directory)
+    };
+
+    if new_path.is_dir() {
+        *path = new_path;
+    }
+
+    Html("<div hx-get='/local_list' hx-trigger='load'></div>".to_string())
 }
 
 pub async fn events(

@@ -15,7 +15,7 @@ main {
     display: flex;
     border: 2px solid var(--border);
     margin-bottom: 1rem;
-    padding: 5rem;
+    padding: 2rem;
 }
 .panel {
     flex: 1;

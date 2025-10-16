@@ -10,3 +10,9 @@ pub struct IndexTemplate {}
 pub struct FilesTableTemplate {
     pub files: Vec<FileInfo>,
 }
+
+#[derive(Template)]
+#[template(path = "local_files_table.html")]
+pub struct LocalFilesTableTemplate {
+    pub files: Vec<FileInfo>,
+}
