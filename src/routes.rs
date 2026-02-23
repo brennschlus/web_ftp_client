@@ -130,9 +130,14 @@ pub async fn events(
                 let connected = is_connected(&mut *state.connection.lock().await).await;
 
                 let footer_html = if connected {
-                    "<p>Подключено к серверу</p>"
+                    "<p>Подключено к серверу</p>".to_string()
                 } else {
-                    "<p>❌ Нет подключения</p>"
+                    let error = state.connection_error.lock().await.clone();
+                    if let Some(err_msg) = error {
+                        format!("<p>❌ Ошибка: {}</p>", err_msg)
+                    } else {
+                        "<p>❌ Нет подключения</p>".to_string()
+                    }
                 };
 
                 let button_html = if connected {
@@ -158,18 +163,33 @@ pub async fn connect_handler(
     Form(form): Form<ConnectForm>,
 ) -> Html<String> {
     let addr = format!("{}:{}", form.host, form.port);
-    let ftp_stream = AsyncFtpStream::connect(&addr).await;
+    
+    // Очищаем предыдущую ошибку
+    *state.connection_error.lock().await = None;
 
-    let html = match ftp_stream {
-        Ok(mut ftp) => {
-            if ftp.login(&form.username, &form.password).await.is_ok() {
-                *state.connection.lock().await = Some(ftp);
-                r#"<div hx-get="/list" hx-trigger="load"></div>"#.to_string()
-            } else {
-                "<p>Ошибка авторизации</p>".to_string()
+    let html = match tokio::time::timeout(Duration::from_secs(5), AsyncFtpStream::connect(&addr)).await {
+        Ok(ftp_stream) => match ftp_stream {
+            Ok(mut ftp) => {
+                if ftp.login(&form.username, &form.password).await.is_ok() {
+                    *state.connection.lock().await = Some(ftp);
+                    r#"<div hx-get="/list" hx-trigger="load"></div>"#.to_string()
+                } else {
+                    let error_msg = "Ошибка авторизации".to_string();
+                    *state.connection_error.lock().await = Some(error_msg.clone());
+                    "<p>Ошибка авторизации</p>".to_string()
+                }
             }
+            Err(e) => {
+                let error_msg = format!("Ошибка подключения: {}", e);
+                *state.connection_error.lock().await = Some(error_msg.clone());
+                format!("<p>{}</p>", error_msg)
+            }
+        },
+        Err(_) => {
+            let error_msg = "Таймаут подключения (5 секунд)".to_string();
+            *state.connection_error.lock().await = Some(error_msg.clone());
+            format!("<p>{}</p>", error_msg)
         }
-        Err(e) => format!("<p>Ошибка подключения: {}</p>", e),
     };
 
     Html(html)
@@ -179,6 +199,7 @@ pub async fn disconnect_handler(State(state): State<AppState>) -> Html<String> {
     let mut conn = state.connection.lock().await;
 
     if let Some(mut ftp) = conn.take() {
+        *state.connection_error.lock().await = None;
         if ftp.quit().await.is_ok() {
             Html("<ul id='remote-list'><li>Нет данных</li></ul>".to_string())
         } else {

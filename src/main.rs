@@ -20,6 +20,7 @@ mod templates;
 #[derive(Clone)]
 pub struct AppState {
     pub connection: Arc<Mutex<Option<AsyncFtpStream>>>,
+    pub connection_error: Arc<Mutex<Option<String>>>,
     pub local_path: Arc<Mutex<PathBuf>>,
 }
 
@@ -40,6 +41,7 @@ struct ChangeDirectoryForm {
 async fn main() {
     let state = AppState {
         connection: Arc::new(Mutex::new(None)),
+        connection_error: Arc::new(Mutex::new(None)),
         local_path: Arc::new(Mutex::new(std::env::current_dir().unwrap())),
     };
     let app = Router::new()
