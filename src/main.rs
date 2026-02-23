@@ -9,8 +9,8 @@ use tokio::sync::Mutex;
 use tower_http::{compression::CompressionLayer, services::ServeDir};
 
 use crate::routes::{
-    change_directory_handler, change_local_directory, connect_handler, disconnect_handler, events,
-    index, list_handler, list_local,
+    change_directory_handler, change_local_directory, connect_handler, disconnect_handler, download_handler, events,
+    index, list_handler, list_local, upload_handler,
 };
 mod filters;
 mod helpers;
@@ -22,6 +22,7 @@ pub struct AppState {
     pub connection: Arc<Mutex<Option<AsyncFtpStream>>>,
     pub connection_error: Arc<Mutex<Option<String>>>,
     pub local_path: Arc<Mutex<PathBuf>>,
+    pub transfer_status: Arc<Mutex<Option<String>>>,
 }
 
 #[derive(Deserialize)]
@@ -43,6 +44,7 @@ async fn main() {
         connection: Arc::new(Mutex::new(None)),
         connection_error: Arc::new(Mutex::new(None)),
         local_path: Arc::new(Mutex::new(std::env::current_dir().unwrap())),
+        transfer_status: Arc::new(Mutex::new(None)),
     };
     let app = Router::new()
         .route("/", get(index))
@@ -52,6 +54,8 @@ async fn main() {
         .route("/change_directory", post(change_directory_handler))
         .route("/local_list", get(list_local))
         .route("/local_change_directory", post(change_local_directory))
+        .route("/upload", post(upload_handler))
+        .route("/download", post(download_handler))
         .route("/events", get(events))
         .nest_service("/assets", ServeDir::new("assets"))
         .layer(CompressionLayer::new())

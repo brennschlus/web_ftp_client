@@ -1,13 +1,13 @@
 use std::{convert::Infallible, fs, str::FromStr, time::Duration};
 
 use askama::Template;
+use axum_extra::extract::Form;
 use axum::{
-    Form,
     extract::State,
     response::{Html, IntoResponse, Sse, sse::Event},
 };
 use futures_util::{Stream, StreamExt};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use suppaftp::{list::File, tokio::AsyncFtpStream};
 use tokio_stream::wrappers::IntervalStream;
 
@@ -16,6 +16,18 @@ use crate::{
     helpers::is_connected,
     templates::{FilesTableTemplate, IndexTemplate, LocalFilesTableTemplate},
 };
+
+#[derive(Deserialize)]
+pub struct UploadForm {
+    #[serde(default)]
+    pub files: Vec<String>,
+}
+
+#[derive(Deserialize)]
+pub struct DownloadForm {
+    #[serde(default)]
+    pub files: Vec<String>,
+}
 
 #[derive(Serialize)]
 pub struct FileInfo {
@@ -48,9 +60,7 @@ pub async fn list_handler(State(state): State<AppState>) -> Html<String> {
             Ok(list) => {
                 let files = list
                     .into_iter()
-                    .map(|item| File::from_str(&item))
-                    .into_iter()
-                    .flatten()
+                    .flat_map(|item| File::from_str(&item))
                     .map(|item| FileInfo::from(&item))
                     .collect::<Vec<_>>();
                 Html(FilesTableTemplate { files }.render().unwrap())
@@ -87,10 +97,10 @@ pub async fn list_local(State(state): State<AppState>) -> Html<String> {
                         .unwrap_or("unknown".into()),
                 });
             }
-            return Html(LocalFilesTableTemplate { files }.render().unwrap());
+            Html(LocalFilesTableTemplate { files }.render().unwrap())
         }
         Err(err) => {
-            return Html(format!("<li>Ошибка: {}</li>", err));
+            Html(format!("<li>Ошибка: {}</li>", err))
         }
     }
 }
@@ -128,9 +138,13 @@ pub async fn events(
             let state = state.clone();
             async move {
                 let connected = is_connected(&mut *state.connection.lock().await).await;
-
                 let footer_html = if connected {
-                    "<p>Подключено к серверу</p>".to_string()
+                    let transfer = state.transfer_status.lock().await.clone();
+                    if let Some(msg) = transfer {
+                        format!("<p>🔄 {}</p>", msg)
+                    } else {
+                        "<p>Подключено к серверу</p>".to_string()
+                    }
                 } else {
                     let error = state.connection_error.lock().await.clone();
                     if let Some(err_msg) = error {
@@ -254,18 +268,82 @@ pub async fn change_directory_handler(
                 }
             }
         }
-
-        // if ftp.cwd(&form.directory).await.is_ok() {
-        //     {
-        //         let mut conn = state.connection.lock().await;
-        //         *conn = Some(ftp);
-        //     }
-
-        //     Html("<div hx-get='/list' hx-trigger='load'></div>".to_string())
-        // } else {
-        //     Html("<p>Ошибка смены директории</p>".to_string())
-        // }
     } else {
         Html("<p>Нет активного соединения</p>".to_string())
     }
+}
+
+pub async fn upload_handler(
+    State(state): State<AppState>,
+    Form(form): axum_extra::extract::Form<UploadForm>,
+) -> axum::response::Response {
+    if form.files.is_empty() {
+        return Html("".to_string()).into_response();
+    }
+
+    let local_path = state.local_path.lock().await.clone();
+    let ftp_opt = { state.connection.lock().await.take() };
+
+    if let Some(mut ftp) = ftp_opt {
+        for filename in form.files {
+            let file_path = local_path.join(&filename);
+            if file_path.is_file() {
+                *state.transfer_status.lock().await = Some(format!("Загрузка: {}", filename));
+                if let Ok(mut file) = tokio::fs::File::open(&file_path).await {
+                    let mut reader = tokio::io::BufReader::new(&mut file);
+                    let _ = ftp.put_file(&filename, &mut reader).await;
+                }
+            }
+        }
+        *state.transfer_status.lock().await = None;
+        let mut conn = state.connection.lock().await;
+        *conn = Some(ftp);
+    }
+    (
+        [("HX-Trigger", "refreshRemote")],
+        Html("".to_string())
+    ).into_response()
+}
+
+pub async fn download_handler(
+    State(state): State<AppState>,
+    Form(form): axum_extra::extract::Form<DownloadForm>,
+) -> axum::response::Response {
+    if form.files.is_empty() {
+        return Html("".to_string()).into_response();
+    }
+
+    let local_path = state.local_path.lock().await.clone();
+    let ftp_opt = { state.connection.lock().await.take() };
+
+    if let Some(mut ftp) = ftp_opt {
+        for filename in form.files {
+            *state.transfer_status.lock().await = Some(format!("Скачивание: {}", filename));
+            
+            let stream = ftp.retr_as_stream(&filename).await;
+            if let Ok(mut data_stream) = stream {
+                let file_path = local_path.join(&filename);
+                if let Ok(mut local_file) = tokio::fs::File::create(file_path).await {
+                    use tokio::io::AsyncReadExt;
+                    let mut buffer = [0; 8192];
+                    while let Ok(n) = data_stream.read(&mut buffer).await {
+                        if n == 0 {
+                            break;
+                        }
+                        let _ = tokio::io::AsyncWriteExt::write_all(&mut local_file, &buffer[..n]).await;
+                    }
+                }
+                ftp.finalize_retr_stream(data_stream).await.ok();
+            } else {
+               // Ignore folder error
+            }
+        }
+        *state.transfer_status.lock().await = None;
+        let mut conn = state.connection.lock().await;
+        *conn = Some(ftp);
+    }
+    (
+        [("HX-Trigger", "refreshLocal")],
+        Html("".to_string())
+    ).into_response()
 }
