@@ -409,6 +409,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "ftp_fs"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "futures-util",
+ "log",
+ "serde",
+ "suppaftp",
+ "thiserror",
+ "tokio",
+ "tokio-stream",
+]
+
+[[package]]
 name = "futures-channel"
 version = "0.3.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1415,7 +1429,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "web_ftp_client"
+name = "web"
 version = "0.1.0"
 dependencies = [
  "askama",
@@ -1423,10 +1437,10 @@ dependencies = [
  "axum-extra",
  "axum-macros",
  "axum-server",
+ "ftp_fs",
  "futures-util",
  "log",
  "serde",
- "suppaftp",
  "tokio",
  "tokio-stream",
  "tower-http",

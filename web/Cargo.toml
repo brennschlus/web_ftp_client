@@ -1,0 +1,22 @@
+[package]
+name = "web"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "web"
+path = "src/main.rs"
+
+[dependencies]
+ftp_fs = { path = "../ftp_fs" }
+axum = "0.7"
+axum-server = "0.7.2"
+axum-macros = "0.5.0"
+axum-extra = { version = "0.9", features = ["form"] }
+askama = "0.12"
+tower-http = { version = "0.6.6", features = ["fs", "compression-full"] }
+tokio = { workspace = true }
+serde = { workspace = true }
+futures-util = { workspace = true }
+log = { workspace = true }
+tokio-stream = "0.1.17"

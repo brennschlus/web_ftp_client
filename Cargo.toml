@@ -1,18 +1,12 @@
-[package]
-name = "web_ftp_client"
-version = "0.1.0"
-edition = "2024"
+[workspace]
+members = ["ftp_fs", "web"]
+resolver = "2"
 
-[dependencies]
-axum = "0.7"
-axum-server = "0.7.2"
-askama = "0.12"
+[workspace.dependencies]
 tokio = { version = "1", features = ["full", "tracing"] }
-log = "0.4.24"
-tower-http = { version = "0.6.6", features = ["fs", "compression-full"] }
-suppaftp = { version = "7.0.5", features = ["tokio"] }
 serde = { version = "1.0.228", features = ["derive"] }
-axum-macros = "0.5.0"
+suppaftp = { version = "7.0.5", features = ["tokio"] }
 futures-util = "0.3.31"
-tokio-stream = "0.1.17"
-axum-extra = { version = "0.9", features = ["form"] }
+thiserror = "2"
+async-trait = "0.1"
+log = "0.4.24"
