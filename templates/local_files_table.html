@@ -26,15 +26,15 @@
                     <input type="checkbox" name="files" value="{{ f.name }}" />
                 </td>
                 <td data-label="Name">
-                    {% if f.kind == "dir" %}
+                    {% if f.is_dir() %}
                     <a href="#" hx-post="/local_change_directory" hx-vals='{"directory": "{{ f.name }}"}'
                         hx-target="#local-list" hx-swap="innerHTML" class="dir-link">
                         📁 {{ f.name }}
                     </a>
                     {% else %} 📄 {{ f.name }} {% endif %}
                 </td>
-                <td data-label="Kind">{{ f.kind }}</td>
-                <td data-label="Size">{{f.size}}</td>
+                <td data-label="Kind">{% if f.is_dir() %}dir{% else %}file{% endif %}</td>
+                <td data-label="Size">{{ f.size_display() }}</td>
             </tr>
             {% endfor %}
         </tbody>

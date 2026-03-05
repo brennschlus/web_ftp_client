@@ -13,14 +13,3 @@ pub async fn is_connected(state: &mut Option<AsyncFtpStream>) -> bool {
         false
     }
 }
-
-// pub fn render_file_table(files: Vec<String>) -> Html<String> {
-//     let files = files
-//         .into_iter()
-//         .map(|item| File::from_str(&item))
-//         .into_iter()
-//         .flatten()
-//         .map(|item| FileInfo::from(&item))
-//         .collect::<Vec<_>>();
-//     Html(FilesTableTemplate { files }.render().unwrap())
-// }

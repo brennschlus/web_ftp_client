@@ -4,8 +4,8 @@ use async_trait::async_trait;
 
 use crate::{
     FileSystem,
-    error::FsResult,
     error::FsError,
+    error::FsResult,
     types::{FileEntry, FileKind},
 };
 
@@ -31,8 +31,7 @@ impl LocalFs {
 #[async_trait]
 impl FileSystem for LocalFs {
     async fn list(&mut self) -> FsResult<Vec<FileEntry>> {
-        let entries = std::fs::read_dir(&self.current_path)
-            .map_err(FsError::Io)?;
+        let entries = std::fs::read_dir(&self.current_path).map_err(FsError::Io)?;
 
         let mut files = Vec::new();
         for entry in entries.flatten() {
@@ -48,9 +47,7 @@ impl FileSystem for LocalFs {
         }
 
         // Сортировка: директории сначала, затем файлы по алфавиту
-        files.sort_by(|a, b| {
-            b.is_dir().cmp(&a.is_dir()).then(a.name.cmp(&b.name))
-        });
+        crate::types::sort_file_entries(&mut files);
 
         Ok(files)
     }

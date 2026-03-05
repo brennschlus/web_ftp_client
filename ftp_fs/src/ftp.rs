@@ -155,7 +155,7 @@ impl FileSystem for FtpFs {
             .collect();
 
         // Директории сначала, затем файлы по алфавиту
-        files.sort_by(|a, b| b.is_dir().cmp(&a.is_dir()).then(a.name.cmp(&b.name)));
+        crate::types::sort_file_entries(&mut files);
 
         Ok(files)
     }

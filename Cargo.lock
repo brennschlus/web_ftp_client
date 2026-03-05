@@ -1429,7 +1429,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "web"
+name = "web_ftp_client"
 version = "0.1.0"
 dependencies = [
  "askama",
@@ -1441,6 +1441,7 @@ dependencies = [
  "futures-util",
  "log",
  "serde",
+ "thiserror",
  "tokio",
  "tokio-stream",
  "tower-http",

@@ -2,61 +2,39 @@ use axum::{
     Router,
     routing::{get, post},
 };
-use serde::Deserialize;
-use std::{path::PathBuf, sync::Arc};
-use suppaftp::tokio::AsyncFtpStream;
+use ftp_fs::LocalFs;
+use std::sync::Arc;
 use tokio::sync::Mutex;
 use tower_http::{compression::CompressionLayer, services::ServeDir};
 
-use crate::routes::{
-    change_directory_handler, change_local_directory, connect_handler, disconnect_handler, download_handler, events,
-    index, list_handler, list_local, upload_handler,
-};
-mod filters;
-mod helpers;
+mod error;
 mod routes;
+mod state;
 mod templates;
-
-#[derive(Clone)]
-pub struct AppState {
-    pub connection: Arc<Mutex<Option<AsyncFtpStream>>>,
-    pub connection_error: Arc<Mutex<Option<String>>>,
-    pub local_path: Arc<Mutex<PathBuf>>,
-    pub transfer_status: Arc<Mutex<Option<String>>>,
-}
-
-#[derive(Deserialize)]
-struct ConnectForm {
-    host: String,
-    port: u16,
-    username: String,
-    password: String,
-}
-
-#[derive(Deserialize)]
-struct ChangeDirectoryForm {
-    directory: String,
-}
 
 #[tokio::main]
 async fn main() {
-    let state = AppState {
-        connection: Arc::new(Mutex::new(None)),
+    let state = state::AppState {
+        ftp: Arc::new(Mutex::new(None)),
         connection_error: Arc::new(Mutex::new(None)),
-        local_path: Arc::new(Mutex::new(std::env::current_dir().unwrap())),
+        local_fs: Arc::new(Mutex::new(LocalFs::new(std::env::current_dir().unwrap()))),
         transfer_status: Arc::new(Mutex::new(None)),
     };
+
     let app = Router::new()
-        .route("/", get(index))
-        .route("/connect", post(connect_handler))
-        .route("/disconnect", post(disconnect_handler))
-        .route("/list", get(list_handler))
-        .route("/change_directory", post(change_directory_handler))
-        .route("/local_list", get(list_local))
-        .route("/local_change_directory", post(change_local_directory))
-        .route("/upload", post(upload_handler))
-        .route("/download", post(download_handler))
-        .route("/events", get(events))
+        .route("/", get(routes::index))
+        .route("/connect", post(routes::connect_handler))
+        .route("/disconnect", post(routes::disconnect_handler))
+        .route("/list", get(routes::list_handler))
+        .route("/change_directory", post(routes::change_directory_handler))
+        .route("/local_list", get(routes::list_local))
+        .route(
+            "/local_change_directory",
+            post(routes::change_local_directory),
+        )
+        .route("/upload", post(routes::upload_handler))
+        .route("/download", post(routes::download_handler))
+        .route("/events", get(routes::events))
         .nest_service("/assets", ServeDir::new("assets"))
         .layer(CompressionLayer::new())
         .with_state(state);

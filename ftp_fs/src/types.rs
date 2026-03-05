@@ -50,6 +50,12 @@ impl FileEntry {
     }
 }
 
+/// Сортирует список элементов файловой системы:
+/// директории первыми, затем файлы. Внутри групп — по алфавиту.
+pub fn sort_file_entries(files: &mut [FileEntry]) {
+    files.sort_by(|a, b| b.is_dir().cmp(&a.is_dir()).then(a.name.cmp(&b.name)));
+}
+
 /// Параметры для подключения к FTP-серверу.
 #[derive(Debug, Clone)]
 pub struct FtpConnectParams {
