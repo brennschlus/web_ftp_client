@@ -8,10 +8,11 @@
         <link rel="stylesheet" href="/assets/css/main.css" />
         <script defer src="/assets/js/htmx.js"></script>
         <script defer src="/assets/js/sse.js"></script>
+        <script defer src="/assets/js/idiomorph-ext.js"></script>
         <script type="module" src="/assets/js/init.js" defer></script>
         <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
     </head>
-    <body hx-ext="sse" sse-connect="/events">
+    <body hx-ext="sse, morph" sse-connect="/events">
         <form
             id="connection-form"
             hx-post="/connect"

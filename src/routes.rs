@@ -87,16 +87,15 @@ pub async fn change_local_directory(
     if let Err(e) = local.change_dir(&form.directory).await {
         log::warn!("Ошибка смены локальной директории: {}", e);
     }
-    Ok(Html(
-        "<div hx-get='/local_list' hx-trigger='load'></div>".to_string(),
-    ))
+    let files = local.list().await?;
+    Ok(Html(LocalFilesTableTemplate { files }.render().unwrap()))
 }
 
 /// Подключение к FTP-серверу.
 pub async fn connect_handler(
     State(state): State<AppState>,
     Form(form): Form<ConnectForm>,
-) -> Result<Html<String>, AppError> {
+) -> axum::response::Response {
     *state.connection_error.lock().await = None;
 
     let params = FtpConnectParams::new(form.host, form.port, form.username, form.password);
@@ -104,14 +103,16 @@ pub async fn connect_handler(
     match FtpFs::connect(params).await {
         Ok(ftp) => {
             *state.ftp.lock().await = Some(ftp);
-            Ok(Html(
-                r#"<div hx-get="/list" hx-trigger="load"></div>"#.to_string(),
-            ))
+            (
+                [("HX-Reswap", "none"), ("HX-Trigger", "refreshRemote")],
+                Html(String::new()),
+            )
+                .into_response()
         }
         Err(e) => {
             let msg = e.to_string();
             *state.connection_error.lock().await = Some(msg.clone());
-            Ok(Html(format!("<p>{}</p>", msg)))
+            Html(format!("<p>{}</p>", msg)).into_response()
         }
     }
 }
@@ -127,9 +128,7 @@ pub async fn disconnect_handler(State(state): State<AppState>) -> Result<Html<St
         });
     }
 
-    Ok(Html(
-        "<ul id='remote-list'><li>Нет данных</li></ul>".to_string(),
-    ))
+    Ok(Html("<li>Нет данных</li>".to_string()))
 }
 
 /// Смена директории на FTP-сервере.
@@ -140,9 +139,8 @@ pub async fn change_directory_handler(
     let mut ftp_guard = state.ftp.lock().await;
     let ftp = get_ftp(&mut ftp_guard).await?;
     ftp.change_dir(&form.directory).await?;
-    Ok(Html(
-        "<div hx-get='/list' hx-trigger='load'></div>".to_string(),
-    ))
+    let files = ftp.list().await?;
+    Ok(Html(FilesTableTemplate { files }.render().unwrap()))
 }
 
 /// Общая логика передачи файлов (скачивание или загрузка)

@@ -31,7 +31,7 @@ impl LocalFs {
 #[async_trait]
 impl FileSystem for LocalFs {
     async fn list(&mut self) -> FsResult<Vec<FileEntry>> {
-        let entries = std::fs::read_dir(&self.current_path).map_err(FsError::Io)?;
+        let entries = std::fs::read_dir(self.path()).map_err(FsError::Io)?;
 
         let mut files = Vec::new();
         for entry in entries.flatten() {
@@ -54,12 +54,12 @@ impl FileSystem for LocalFs {
 
     async fn change_dir(&mut self, path: &str) -> FsResult<()> {
         let new_path = if path == ".." {
-            self.current_path
+            self.path()
                 .parent()
                 .map(|p| p.to_path_buf())
-                .unwrap_or_else(|| self.current_path.clone())
+                .unwrap_or_else(|| self.path().to_path_buf())
         } else {
-            self.current_path.join(path)
+            self.path().join(path)
         };
 
         if new_path.is_dir() {

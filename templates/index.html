@@ -2,7 +2,8 @@
 
 <section class="panel">
     <div class="panel-header">Локальный сервер</div>
-    <ul id="local-list" class="local-list" hx-get="/local_list" hx-trigger="load, refreshLocal from:body">
+    <ul id="local-list" class="local-list" hx-get="/local_list" hx-trigger="load, refreshLocal from:body"
+        hx-swap="morph:innerHTML">
         <li>Нет данных</li>
     </ul>
 </section>
@@ -16,7 +17,8 @@
 
 <section class="panel">
     <div class="panel-header">Удалённый сервер</div>
-    <ul id="remote-list" class="file-list" hx-get="/list" hx-trigger="load, refreshRemote from:body">
+    <ul id="remote-list" class="file-list" hx-get="/list" hx-trigger="load, refreshRemote from:body"
+        hx-swap="morph:innerHTML">
         <li>Нет данных</li>
     </ul>
 </section>

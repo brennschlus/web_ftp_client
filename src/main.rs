@@ -39,7 +39,8 @@ async fn main() {
         .layer(CompressionLayer::new())
         .with_state(state);
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
-    println!("Сервер запущен на http://0.0.0.0:3000");
+    let local_addr = "0.0.0.0:3000";
+    let listener = tokio::net::TcpListener::bind(local_addr).await.unwrap();
+    println!("Сервер запущен на http://{}", local_addr);
     axum::serve(listener, app).await.unwrap();
 }
